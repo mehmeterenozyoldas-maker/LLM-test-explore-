@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Aloha IK + MediaPipe 1.9",
+  "description": "Menagerie",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": []
+}
