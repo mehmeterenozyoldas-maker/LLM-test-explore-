@@ -16,7 +16,7 @@
     "@google/genai": "^1.28.0",
     "uuid": "^13.0.0",
     "three": "^0.181.0",
-    "mujoco_wasm": "latest",
+    "mujoco_wasm": "npm:mujoco-js@0.0.7",
     "@mediapipe/tasks-vision": "0.10.14"
   },
   "devDependencies": {
