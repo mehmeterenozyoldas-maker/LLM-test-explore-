@@ -8,6 +8,7 @@
 import * as THREE from 'three';
 import { AlohaIK } from './AlohaIK';
 import { DragStateManager } from './DragStateManager';
+import { DrumManager } from './DrumManager';
 import { IkSystem } from './IkSystem';
 import { RenderSystem } from './RenderSystem';
 import { RobotLoader } from './RobotLoader';
@@ -29,6 +30,7 @@ export class MujocoSim {
     renderSys: RenderSystem;
     ikSys: IkSystem;
     alohaIk: AlohaIK;
+    drumManager: DrumManager;
     dragStateManager: DragStateManager;
     selectionManager: SelectionManager;
     sequenceAnimator: SequenceAnimator;
@@ -68,6 +70,7 @@ export class MujocoSim {
         this.renderSys.scene.add(this.ikSys.control as unknown as THREE.Object3D);
         
         this.alohaIk = new AlohaIK(this.mujoco, this.renderSys);
+        this.drumManager = new DrumManager(this.renderSys.scene);
 
         this.sequenceAnimator = new SequenceAnimator();
         
@@ -198,6 +201,27 @@ export class MujocoSim {
                 const startSimTime = this.mjData.time;
                 while (this.mjData.time - startSimTime < (1.0 / 60.0) * this.speedMultiplier) {
                     this.mujoco.mj_step(this.mjModel, this.mjData);
+                }
+                
+                if (this.isAloha && this.alohaIk.arms.length > 0) {
+                    const effectors: THREE.Vector3[] = [];
+                    for (const arm of this.alohaIk.arms) {
+                        const off = arm.siteId * 3;
+                        effectors.push(new THREE.Vector3(
+                            this.mjData.site_xpos[off],
+                            this.mjData.site_xpos[off+1],
+                            this.mjData.site_xpos[off+2]
+                        ));
+                    }
+                    this.drumManager.update(effectors);
+                } else if (this.isFranka && this.ikSys.gripperSiteId >= 0) {
+                    const off = this.ikSys.gripperSiteId * 3;
+                    const effector = new THREE.Vector3(
+                        this.mjData.site_xpos[off],
+                        this.mjData.site_xpos[off+1],
+                        this.mjData.site_xpos[off+2]
+                    );
+                    this.drumManager.update([effector]);
                 }
             }
 
